@@ -669,6 +669,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
         // Draw fills
         NSDecimal theAreaBaseValue;
         CPTFill *theFill = nil;
+        BOOL isNegative = NO;
 
         for ( NSUInteger i = 0; i < 2; i++ ) {
             switch ( i ) {
@@ -680,6 +681,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
                 case 1:
                     theAreaBaseValue = self.areaBaseValue2;
                     theFill          = self.areaFill2;
+                    isNegative       = YES;
                     break;
 
                 default:
@@ -700,11 +702,14 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
                 if ( self.alignsPointsToPixels ) {
                     baseLinePoint = CPTAlignIntegralPointToUserSpace(context, baseLinePoint);
                 }
-
-                CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndexRange baselineYValue:baseLinePoint.y];
+                
+                
+                
+                CGPathRef dataLinePath = [self setFillForViewPoints:viewPoints indexRange:viewIndexRange baselineYValue:baseLinePoint.y areaNagative:isNegative];
 
                 CGContextBeginPath(context);
                 CGContextAddPath(context, dataLinePath);
+                
                 [theFill fillPathInContext:context];
 
                 CGPathRelease(dataLinePath);
@@ -798,7 +803,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
             else {
                 switch ( theInterpolation ) {
                     case CPTScatterPlotInterpolationLinear:
-                        CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x, viewPoint.y);
+                            CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x, viewPoint.y);
                         break;
 
                     case CPTScatterPlotInterpolationStepped:
@@ -914,6 +919,97 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
         CGPathCloseSubpath(dataLinePath);
     }
 
+    return dataLinePath;
+}
+
+-(CGPathRef)setFillForViewPoints:(CGPoint *)viewPoints indexRange:(NSRange)indexRange baselineYValue:(CGFloat)baselineYValue areaNagative:(BOOL)isNegative
+{
+    CGMutablePathRef dataLinePath                = CGPathCreateMutable();
+    CPTScatterPlotInterpolation theInterpolation = self.interpolation;
+    BOOL lastPointSkipped                        = YES;
+    CGPoint firstPoint                           = CGPointZero;
+    CGPoint lastPoint                            = CGPointZero;
+    CGPoint nextPoint                            = CGPointZero;
+    NSUInteger lastDrawnPointIndex               = NSMaxRange(indexRange);
+    CGPoint lastControlPoint                     = CGPointZero;
+    
+    if ( lastDrawnPointIndex > 0 ) {
+        lastDrawnPointIndex--;
+    }
+    
+    for ( NSUInteger i = indexRange.location; i <= lastDrawnPointIndex; i++ ) {
+        CGPoint viewPoint = viewPoints[i];
+        
+        if ( isnan(viewPoint.x) || isnan(viewPoint.y) ) {
+            if ( !lastPointSkipped ) {
+                if ( !isnan(baselineYValue) ) {
+                    CGPathAddLineToPoint(dataLinePath, NULL, lastPoint.x, baselineYValue);
+                    CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, baselineYValue);
+                    CGPathCloseSubpath(dataLinePath);
+                }
+                lastPointSkipped = YES;
+            }
+        }
+        else {
+            if ( lastPointSkipped ) {
+                if(isNegative) {
+                    CGPathMoveToPoint(dataLinePath, NULL, viewPoint.x, baselineYValue);
+                }
+                else {
+                    CGPathMoveToPoint(dataLinePath, NULL, viewPoint.x, viewPoint.y);
+                }
+                lastPointSkipped = NO;
+                firstPoint       = viewPoint;
+                // Control point used for Bezier curves - reset after skipped points
+                lastControlPoint = viewPoint;
+            }
+            else {
+                switch ( theInterpolation ) {
+                    case CPTScatterPlotInterpolationLinear:
+                        if(isNegative) {
+                            if(viewPoint.y < baselineYValue) {
+                                if( lastPoint.y < baselineYValue) {
+                                    CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x , viewPoint.y);
+                                } else if(lastPoint.y > baselineYValue){
+                                    CGFloat a = -(lastPoint.y - viewPoint.y) / (viewPoint.x - lastPoint.x);
+                                    CGFloat b = viewPoint.y - (a * viewPoint.x);
+                                    CGPathAddLineToPoint(dataLinePath, NULL, (baselineYValue - b) /a , baselineYValue);
+                                    CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x , viewPoint.y);
+                                }
+                                else {
+                                    CGPathAddLineToPoint(dataLinePath, NULL, (viewPoint.x * baselineYValue)/ viewPoint.y , baselineYValue);
+                                }
+                            } else {
+                                if(lastPoint.y < baselineYValue) {
+                                    CGFloat a = -(lastPoint.y - viewPoint.y) / (viewPoint.x - lastPoint.x);
+                                    CGFloat b = viewPoint.y - (a * viewPoint.x);
+                                    CGPathAddLineToPoint(dataLinePath, NULL, (baselineYValue - b) /a , baselineYValue);
+                                    CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x , baselineYValue);
+                                } else {
+                                    CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x, baselineYValue);
+                                }
+                            }
+                        } else {
+                            CGPathAddLineToPoint(dataLinePath, NULL, viewPoint.x, viewPoint.y);
+                        }
+                        break;
+                        
+                        
+                    default:
+                        [NSException raise:CPTException format:@"Interpolation method not supported in scatter plot."];
+                        break;
+                }
+            }
+            lastPoint = viewPoint;
+        }
+    }
+    
+    if ( !lastPointSkipped && !isnan(baselineYValue) ) {
+        CGPathAddLineToPoint(dataLinePath, NULL, lastPoint.x, baselineYValue);
+        CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, baselineYValue);
+        CGPathCloseSubpath(dataLinePath);
+    }
+    
     return dataLinePath;
 }
 
