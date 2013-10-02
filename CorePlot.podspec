@@ -21,13 +21,17 @@ Pod::Spec.new do |s|
   s.osx.source_files = 'Source/framework/CorePlot.h', 'Source/framework/MacOnly/*.{h,m}'
   s.framework   = 'QuartzCore'
 
-  s.pre_install do |pod, target_definition|
-    Dir.chdir(pod.root) {
-      unless File.exists?('Source/framework')
-        FileUtils.mv Dir.glob('**/framework'), '.'
-        FileUtils.mv Dir.glob('**/License.txt'), '.'
-        `dtrace -h -s Source/framework/TestResources/CorePlotProbes.d -o Source/framework/Source/CorePlotProbes.h`
-      end
-    }
-  end
+  s.prepare_command = <<-CMD
+    dtrace -h -s Source/framework/TestResources/CorePlotProbes.d -o Source/framework/Source/CorePlotProbes.h
+  CMD
+
+  # s.pre_install do |pod, target_definition|
+  #   Dir.chdir(pod.root) {
+  #     unless File.exists?('Source/framework')
+  #       FileUtils.mv Dir.glob('**/framework'), '.'
+  #       FileUtils.mv Dir.glob('**/License.txt'), '.'
+  #       `dtrace -h -s Source/framework/TestResources/CorePlotProbes.d -o Source/framework/Source/CorePlotProbes.h`
+  #     end
+  #   }
+  # end
 end
