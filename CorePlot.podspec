@@ -14,7 +14,8 @@ Pod::Spec.new do |s|
                   'of data, and is tightly integrated with Apple technologies like Core Animation, ' \
                   'Core Data, and Cocoa Bindings.'
 
-  s.source_files = 'Source/framework/Source/*.{h,m}', 'Source/framework/TestResources/*.d'
+  s.source_files = 'Source/framework/Source/*.{h,m}'
+  s.preserve_paths = 'Source/framework/TestResources'
   s.exclude_files = '**/*{TestCase,Tests}.{h,m}'
   s.ios.source_files = 'Source/framework/CorePlot-CocoaTouch.h', 'Source/framework/iPhoneOnly/*.{h,m}'
   s.osx.source_files = 'Source/framework/CorePlot.h', 'Source/framework/MacOnly/*.{h,m}'
