@@ -312,6 +312,8 @@ NSDecimal niceNum(NSDecimal x);
  **/
 @synthesize minorTickLabelShadow;
 
+@synthesize zeroAxisXLineStyle;
+
 // Major ticks
 
 /** @property NSDecimal majorIntervalLength
@@ -520,6 +522,7 @@ NSDecimal niceNum(NSDecimal x);
         attributedTitle             = nil;
         titleOffset                 = CPTFloat(30.0);
         axisLineStyle               = [[CPTLineStyle alloc] init];
+        zeroAxisXLineStyle          = [[CPTLineStyle alloc] init];
         majorTickLineStyle          = [[CPTLineStyle alloc] init];
         minorTickLineStyle          = [[CPTLineStyle alloc] init];
         tickLabelDirection          = CPTSignNone;
@@ -594,6 +597,7 @@ NSDecimal niceNum(NSDecimal x);
         attributedTitle             = [theLayer->attributedTitle retain];
         titleOffset                 = theLayer->titleOffset;
         axisLineStyle               = [theLayer->axisLineStyle retain];
+        zeroAxisXLineStyle          = [theLayer->zeroAxisXLineStyle retain];
         majorTickLineStyle          = [theLayer->majorTickLineStyle retain];
         minorTickLineStyle          = [theLayer->minorTickLineStyle retain];
         tickLabelDirection          = theLayer->tickLabelDirection;
@@ -651,6 +655,7 @@ NSDecimal niceNum(NSDecimal x);
     [title release];
     [attributedTitle release];
     [axisLineStyle release];
+    [zeroAxisXLineStyle release];
     [majorTickLineStyle release];
     [minorTickLineStyle release];
     [majorGridLineStyle release];
@@ -701,6 +706,7 @@ NSDecimal niceNum(NSDecimal x);
     [coder encodeInt:self.labelAlignment forKey:@"CPTAxis.labelAlignment"];
     [coder encodeInt:self.minorTickLabelAlignment forKey:@"CPTAxis.minorTickLabelAlignment"];
     [coder encodeObject:self.axisLineStyle forKey:@"CPTAxis.axisLineStyle"];
+    [coder encodeObject:self.zeroAxisXLineStyle forKey:@"CPTAxis.zeroAxisXLineStyle"];
     [coder encodeObject:self.majorTickLineStyle forKey:@"CPTAxis.majorTickLineStyle"];
     [coder encodeObject:self.minorTickLineStyle forKey:@"CPTAxis.minorTickLineStyle"];
     [coder encodeInteger:self.tickLabelDirection forKey:@"CPTAxis.tickLabelDirection"];
@@ -761,6 +767,7 @@ NSDecimal niceNum(NSDecimal x);
         labelAlignment              = (CPTAlignment)[coder decodeIntForKey : @"CPTAxis.labelAlignment"];
         minorTickLabelAlignment     = (CPTAlignment)[coder decodeIntForKey : @"CPTAxis.minorTickLabelAlignment"];
         axisLineStyle               = [[coder decodeObjectForKey:@"CPTAxis.axisLineStyle"] copy];
+        zeroAxisXLineStyle               = [[coder decodeObjectForKey:@"CPTAxis.zeroAxisXLineStyle"] copy];
         majorTickLineStyle          = [[coder decodeObjectForKey:@"CPTAxis.majorTickLineStyle"] copy];
         minorTickLineStyle          = [[coder decodeObjectForKey:@"CPTAxis.minorTickLineStyle"] copy];
         tickLabelDirection          = (CPTSign)[coder decodeIntegerForKey : @"CPTAxis.tickLabelDirection"];
@@ -2318,6 +2325,15 @@ NSDecimal niceNum(NSDecimal x)
     if ( newCoordinate != coordinate ) {
         coordinate        = newCoordinate;
         self.needsRelabel = YES;
+    }
+}
+
+-(void)setZeroAxisXLineStyle:(CPTLineStyle *)newLineStyle
+{
+    if ( newLineStyle != zeroAxisXLineStyle ) {
+        [zeroAxisXLineStyle release];
+        zeroAxisXLineStyle = [newLineStyle copy];
+        [self setNeedsDisplay];
     }
 }
 

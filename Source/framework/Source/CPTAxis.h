@@ -131,6 +131,7 @@ CPTAxisLabelingPolicy;
     CPTAlignment labelAlignment;
     CPTAlignment minorTickLabelAlignment;
     CPTLineStyle *axisLineStyle;
+    CPTLineStyle *zeroAxisXLineStyle;
     CPTLineStyle *majorTickLineStyle;
     CPTLineStyle *minorTickLineStyle;
     CPTLineStyle *majorGridLineStyle;
@@ -178,6 +179,7 @@ CPTAxisLabelingPolicy;
 /// @name Axis
 /// @{
 @property (nonatomic, readwrite, copy) CPTLineStyle *axisLineStyle;
+@property (nonatomic, readwrite, copy) CPTLineStyle *zeroAxisXLineStyle;
 @property (nonatomic, readwrite, assign) CPTCoordinate coordinate;
 @property (nonatomic, readwrite, assign) NSDecimal labelingOrigin;
 @property (nonatomic, readwrite, assign) CPTSign tickDirection;

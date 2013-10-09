@@ -329,10 +329,11 @@
 
     // Axis Line
     CPTLineStyle *theLineStyle = self.axisLineStyle;
+    CPTLineStyle *zeroLineStyle = self.zeroAxisXLineStyle;
     CPTLineCap *minCap         = self.axisLineCapMin;
     CPTLineCap *maxCap         = self.axisLineCapMax;
 
-    if ( theLineStyle || minCap || maxCap ) {
+    if ( theLineStyle || minCap || maxCap  || zeroLineStyle) {
         // If there is a separate axis range given then restrict the axis to that range, overriding the visible range
         // given for grid lines and ticks.
         CPTPlotRange *theVisibleAxisRange = self.visibleAxisRange;
@@ -354,6 +355,21 @@
             CGContextMoveToPoint(context, startViewPoint.x, startViewPoint.y);
             CGContextAddLineToPoint(context, endViewPoint.x, endViewPoint.y);
             [theLineStyle strokePathInContext:context];
+        }
+        
+        if ( zeroLineStyle ) {
+            CGFloat lineWidth = zeroLineStyle.lineWidth;
+            if ( ( self.contentsScale > CPTFloat(1.0) ) && (round(lineWidth) == lineWidth) ) {
+                alignmentFunction = CPTAlignIntegralPointToUserSpace;
+            }
+            
+            CGPoint startViewPoint = alignmentFunction(context, [self viewPointForOrthogonalCoordinateDecimal:self.orthogonalCoordinateDecimal axisCoordinateDecimal:range.location]);
+            CGPoint endViewPoint   = alignmentFunction(context, [self viewPointForOrthogonalCoordinateDecimal:self.orthogonalCoordinateDecimal axisCoordinateDecimal:range.end]);
+            [zeroLineStyle setLineStyleInContext:context];
+            CGContextBeginPath(context);
+            CGContextMoveToPoint(context, startViewPoint.x, startViewPoint.y);
+            CGContextAddLineToPoint(context, endViewPoint.x, endViewPoint.y);
+            [zeroLineStyle strokePathInContext:context];
         }
 
         CGPoint axisDirection = CGPointZero;
