@@ -1,0 +1,6 @@
+Source/examples
+xcuserdata
+xcshareddata
+build
+.DS_Store
+*.orig
