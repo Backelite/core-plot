@@ -952,7 +952,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
         }
         else {
             if ( lastPointSkipped ) {
-                if(isNegative) {
+                if (isNegative && CGPointEqualToPoint(lastPoint, CGPointZero) && viewPoint.y > baselineYValue) {
                     CGPathMoveToPoint(dataLinePath, NULL, viewPoint.x, baselineYValue);
                 }
                 else {
