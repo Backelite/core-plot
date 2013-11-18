@@ -929,7 +929,6 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
     BOOL lastPointSkipped                        = YES;
     CGPoint firstPoint                           = CGPointZero;
     CGPoint lastPoint                            = CGPointZero;
-    CGPoint nextPoint                            = CGPointZero;
     NSUInteger lastDrawnPointIndex               = NSMaxRange(indexRange);
     CGPoint lastControlPoint                     = CGPointZero;
     
