@@ -20,6 +20,7 @@ Pod::Spec.new do |s|
   s.ios.source_files = 'Source/framework/CorePlot-CocoaTouch.h', 'Source/framework/iPhoneOnly/*.{h,m}'
   s.osx.source_files = 'Source/framework/CorePlot.h', 'Source/framework/MacOnly/*.{h,m}'
   s.framework   = 'QuartzCore'
+  s.requires_arc = false
 
   s.prepare_command = <<-CMD
     dtrace -h -s Source/framework/TestResources/CorePlotProbes.d -o Source/framework/Source/CorePlotProbes.h
