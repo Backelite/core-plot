@@ -34,7 +34,7 @@
 #endif
 
 #if CPT_SDK_SUPPORTS_WEAK
-#define __cpt_weak        __weak
+#define __cpt_weak
 #define cpt_weak_property weak
 #else
 #if __clang__ && (__clang_major__ >= 3)
